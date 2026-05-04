@@ -39,20 +39,22 @@ test.describe('Order Summary and Confirmation', () => {
     // Click continue to go to step 2
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
     // Verify we're on checkout step 2
     expect(page.url()).toContain('checkout-step-two');
 
     // Wait for order summary to load
-    await page.waitForSelector(SELECTORS.checkout.step2.container);
+    const summaryContainer = page.locator(SELECTORS.checkout.step2.container);
+    await summaryContainer.waitFor({ state: 'visible', timeout: 15000 });
 
     // Verify all items are listed
-    const itemNames = await page.locator('.checkout_info .inventory_item_name').allTextContents();
+    const itemNames = await page.locator('[data-test="inventory-item-name"]').allTextContents();
     expect(itemNames).toContain('Sauce Labs Backpack');
     expect(itemNames).toContain('Sauce Labs Bike Light');
 
     // Verify prices are displayed
-    const prices = await page.locator('.checkout_info .inventory_item_price').allTextContents();
+    const prices = await page.locator('[data-test="inventory-item-price"]').allTextContents();
     expect(prices.length).toBeGreaterThanOrEqual(2);
 
     // Verify subtotal
@@ -86,9 +88,13 @@ test.describe('Order Summary and Confirmation', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
     // Click checkout
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const orderCheckout2 = page.locator(SELECTORS.cart.checkoutBtn);
+    await orderCheckout2.waitFor({ state: 'visible', timeout: 10000 });
+    await orderCheckout2.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Fill shipping information
@@ -99,17 +105,18 @@ test.describe('Order Summary and Confirmation', () => {
     // Click continue
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
     // Verify single item is displayed
     const cartItems = await page.locator('.cart_item').count();
     expect(cartItems).toBe(1);
 
     // Verify item name
-    const itemName = await page.locator('.checkout_info .inventory_item_name').first().textContent();
+    const itemName = await page.locator('[data-test="inventory-item-name"]').first().textContent();
     expect(itemName).toContain('Test.allTheThings() T-Shirt');
 
     // Verify price and quantity
-    const price = await page.locator('.checkout_info .inventory_item_price').first().textContent();
+    const price = await page.locator('[data-test="inventory-item-price"]').first().textContent();
     expect(price).toContain('15.99');
   });
 
@@ -132,9 +139,13 @@ test.describe('Order Summary and Confirmation', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
     // Click checkout
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const orderCheckout3 = page.locator(SELECTORS.cart.checkoutBtn);
+    await orderCheckout3.waitFor({ state: 'visible', timeout: 10000 });
+    await orderCheckout3.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Fill shipping information
@@ -145,12 +156,17 @@ test.describe('Order Summary and Confirmation', () => {
     // Continue to order summary
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
     // Verify we're on order summary page
-    await page.waitForSelector(SELECTORS.checkout.step2.container);
+    const summaryLocator = page.locator(SELECTORS.checkout.step2.container);
+    await summaryLocator.waitFor({ state: 'visible', timeout: 15000 });
 
     // Click finish button to complete purchase
-    await page.click(SELECTORS.checkout.step2.finishBtn);
+    await page.waitForSelector(SELECTORS.checkout.step2.finishBtn, { timeout: 10000 });
+    const finishBtn3 = page.locator(SELECTORS.checkout.step2.finishBtn);
+    await finishBtn3.waitFor({ state: 'visible', timeout: 10000 });
+    await finishBtn3.click();
 
     // Wait for confirmation page to load
     await page.waitForURL('**/checkout-complete.html');
@@ -189,8 +205,12 @@ test.describe('Order Summary and Confirmation', () => {
 
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const orderCheckout4 = page.locator(SELECTORS.cart.checkoutBtn);
+    await orderCheckout4.waitFor({ state: 'visible', timeout: 10000 });
+    await orderCheckout4.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     await page.fill(SELECTORS.checkout.step1.firstName, 'John');
@@ -199,8 +219,13 @@ test.describe('Order Summary and Confirmation', () => {
 
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
-    await page.click(SELECTORS.checkout.step2.finishBtn);
+    // Wait for and click finish button
+    await page.waitForSelector(SELECTORS.checkout.step2.finishBtn, { timeout: 10000 });
+    const finishBtn = page.locator(SELECTORS.checkout.step2.finishBtn);
+    await finishBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await finishBtn.click();
     await page.waitForURL('**/checkout-complete.html');
 
     // Verify all confirmation elements

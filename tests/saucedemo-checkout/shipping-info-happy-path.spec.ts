@@ -23,9 +23,13 @@ test.describe('Shipping Information - Happy Path', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
     // Click checkout button
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn.click();
     await page.waitForURL('**/checkout-step-one.html');
     await page.waitForSelector(SELECTORS.checkout.step1.firstName);
 
@@ -44,6 +48,7 @@ test.describe('Shipping Information - Happy Path', () => {
 
     // Wait for checkout step 2
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
     await page.waitForSelector(SELECTORS.checkout.step2.container);
 
     // Verify we're on the order summary page
@@ -69,7 +74,13 @@ test.describe('Shipping Information - Happy Path', () => {
     // Navigate to checkout
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for and click checkout button
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn2 = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn2.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn2.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Fill shipping info with special characters
@@ -86,6 +97,7 @@ test.describe('Shipping Information - Happy Path', () => {
 
     // Verify navigation to step 2
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
     expect(page.url()).toContain('checkout-step-two');
   });
 
@@ -107,7 +119,13 @@ test.describe('Shipping Information - Happy Path', () => {
     // Navigate to checkout
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for and click checkout button
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn3 = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn3.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn3.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Fill shipping info with international postal code format
@@ -123,6 +141,7 @@ test.describe('Shipping Information - Happy Path', () => {
 
     // Verify form validates and navigates to step 2
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
     expect(page.url()).toContain('checkout-step-two');
   });
 });

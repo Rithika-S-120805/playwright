@@ -16,6 +16,7 @@ test.describe('Navigation and Workflow', () => {
 
     // Wait for products page
     await page.waitForURL('**/inventory.html');
+    await page.waitForLoadState('networkidle');
 
     // Add item to cart
     await page.click(PRODUCTS.backpack.selector);
@@ -23,15 +24,22 @@ test.describe('Navigation and Workflow', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
+
+    // Wait for checkout button to be visible
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
 
     // Click checkout to go to step 1
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Verify we're on checkout step 1
     expect(page.url()).toContain('checkout-step-one');
 
     // Look for cancel button
+    await page.waitForSelector(SELECTORS.checkout.step1.cancelBtn);
     const cancelButton = await page.locator(SELECTORS.checkout.step1.cancelBtn).isVisible();
     expect(cancelButton).toBe(true);
 
@@ -58,6 +66,7 @@ test.describe('Navigation and Workflow', () => {
 
     // Wait for products page
     await page.waitForURL('**/inventory.html');
+    await page.waitForLoadState('networkidle');
 
     // Add item to cart
     await page.click(PRODUCTS.backpack.selector);
@@ -65,7 +74,13 @@ test.describe('Navigation and Workflow', () => {
     // Navigate to checkout
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
-    await page.click(SELECTORS.cart.checkoutBtn);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for and click checkout button
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     // Fill checkout step 1
@@ -82,6 +97,7 @@ test.describe('Navigation and Workflow', () => {
     // Continue to step 2
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
     // Verify we're on step 2
     expect(page.url()).toContain('checkout-step-two');
@@ -109,6 +125,7 @@ test.describe('Navigation and Workflow', () => {
 
     // Wait for products page
     await page.waitForURL('**/inventory.html');
+    await page.waitForLoadState('networkidle');
 
     // Add item to cart
     await page.click(PRODUCTS.backpack.selector);
@@ -116,13 +133,13 @@ test.describe('Navigation and Workflow', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
-    // Verify continue shopping button is present
-    const continueShopping = await page.locator(SELECTORS.cart.continueShoppingBtn).isVisible();
-    expect(continueShopping).toBe(true);
-
-    // Click continue shopping
-    await page.click(SELECTORS.cart.continueShoppingBtn);
+    // Wait for continue shopping button to be visible and click
+    await page.waitForSelector(SELECTORS.cart.continueShoppingBtn, { timeout: 10000 });
+    const continueShoppingBtn = page.locator(SELECTORS.cart.continueShoppingBtn);
+    await continueShoppingBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await continueShoppingBtn.click();
 
     // Verify we return to products page
     await page.waitForURL('**/inventory.html');
@@ -144,14 +161,20 @@ test.describe('Navigation and Workflow', () => {
 
     // Wait for products page
     await page.waitForURL('**/inventory.html');
+    await page.waitForLoadState('networkidle');
 
     // Complete full checkout flow
     await page.click(PRODUCTS.backpack.selector);
 
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
-    await page.click(SELECTORS.cart.checkoutBtn);
+    // Wait for and click checkout button
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn.click();
     await page.waitForURL('**/checkout-step-one.html');
 
     await page.fill(SELECTORS.checkout.step1.firstName, 'John');
@@ -160,8 +183,13 @@ test.describe('Navigation and Workflow', () => {
 
     await page.click(SELECTORS.checkout.step1.continueBtn);
     await page.waitForURL('**/checkout-step-two.html');
+    await page.waitForLoadState('networkidle');
 
-    await page.click(SELECTORS.checkout.step2.finishBtn);
+    // Wait for and click finish button
+    await page.waitForSelector(SELECTORS.checkout.step2.finishBtn, { timeout: 10000 });
+    const finishBtn = page.locator(SELECTORS.checkout.step2.finishBtn);
+    await finishBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await finishBtn.click();
     await page.waitForURL('**/checkout-complete.html');
 
     // Verify we're on confirmation page

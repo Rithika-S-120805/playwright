@@ -70,8 +70,8 @@ export const SELECTORS = {
     item: '.cart_item',
     quantity: '.cart_quantity',
     removeBtn: 'button[data-test*="remove"]',
-    checkoutBtn: 'a[data-test="checkout"]',
-    continueShoppingBtn: 'a[data-test="continue-shopping"]',
+    checkoutBtn: 'a[data-test="checkout"], button:has-text("Checkout")',
+    continueShoppingBtn: 'a[data-test="continue-shopping"], button:has-text("Continue Shopping")',
     subtotal: '.summary_subtotal_label',
     total: '.summary_total_label'
   },
@@ -80,28 +80,28 @@ export const SELECTORS = {
       firstName: 'input[data-test="firstName"]',
       lastName: 'input[data-test="lastName"]',
       postalCode: 'input[data-test="postalCode"]',
-      continueBtn: 'input[data-test="continue"]',
-      cancelBtn: 'a[data-test="cancel"]'
+      continueBtn: 'input[data-test="continue"], button:has-text("Continue")',
+      cancelBtn: 'a[data-test="cancel"], button:has-text("Cancel")'
     },
     step2: {
-      container: '.checkout_summary',
-      subtotal: '.summary_subtotal_label',
-      tax: '.summary_tax_label',
-      total: '.summary_total_label',
-      finishBtn: 'button[data-test="finish"]',
-      cancelBtn: 'a[data-test="cancel"]',
-      backBtn: 'a[data-test="back"]'
+      container: '#checkout_summary_container, [data-test="checkout-summary-container"]',
+      subtotal: '.summary_subtotal_label, [data-test="subtotal-label"]',
+      tax: '.summary_tax_label, [data-test="tax-label"]',
+      total: '.summary_total_label, [data-test="total-label"]',
+      finishBtn: 'button[data-test="finish"], button:has-text("Finish")',
+      cancelBtn: 'button[data-test="cancel"], button:has-text("Cancel")',
+      backBtn: 'button[data-test="back"], button:has-text("Back")'
     },
     complete: {
-      container: '.complete-container',
-      header: '.complete-header',
-      text: '.complete-text',
-      backHomeBtn: 'button[data-test="back-home"]'
+      container: '#checkout_complete_container, [data-test="checkout-complete-container"]',
+      header: '[data-test="complete-header"]',
+      text: '[data-test="complete-text"]',
+      backHomeBtn: 'button[data-test="back-home"], button:has-text("Back Home")'
     }
   },
   errors: {
-    container: '.error-message-container',
-    message: '.error-message-container'
+    container: '.error-message-container.error',
+    message: '.error-message-container.error h3, .error-message-container.error'
   }
 };
 
@@ -199,10 +199,15 @@ export async function navigateToCart(page: Page): Promise<void> {
   await page.click(SELECTORS.products.cartLink);
   await page.waitForURL('**/cart.html');
   await page.waitForSelector(SELECTORS.cart.container);
+  await page.waitForSelector(SELECTORS.cart.checkoutBtn);
+  await page.waitForLoadState('networkidle');
 }
 
 export async function startCheckout(page: Page): Promise<void> {
-  await page.click(SELECTORS.cart.checkoutBtn);
+  await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+  const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+  await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+  await checkoutBtn.click();
   await page.waitForURL('**/checkout-step-one.html');
   await page.waitForSelector(SELECTORS.checkout.step1.firstName);
 }
@@ -217,14 +222,19 @@ export async function fillShippingInfo(
 }
 
 export async function continueToStep2(page: Page): Promise<void> {
-  await page.click(SELECTORS.checkout.step1.continueBtn);
+  const continueBtn = page.locator(SELECTORS.checkout.step1.continueBtn);
+  await continueBtn.waitFor({ state: 'visible', timeout: 10000 });
+  await continueBtn.click();
   await page.waitForURL('**/checkout-step-two.html');
-  await page.waitForSelector(SELECTORS.checkout.step2.container);
+  await page.waitForLoadState('networkidle');
+  // Wait for step 2 container
+  await page.waitForSelector('#checkout_summary_container, [data-test="checkout-summary-container"], button[data-test="finish"]', { timeout: 15000 });
 }
 
 export async function completeCheckout(page: Page): Promise<void> {
   await page.click(SELECTORS.checkout.step2.finishBtn);
   await page.waitForURL('**/checkout-complete.html');
+  await page.waitForLoadState('networkidle');
   await page.waitForSelector(SELECTORS.checkout.complete.header);
 }
 

@@ -138,14 +138,39 @@ test.describe('Cart View and Navigation', () => {
     // Navigate to cart
     await page.click('.shopping_cart_link');
     await page.waitForURL('**/cart.html');
+    await page.waitForLoadState('networkidle');
 
-    // Verify subtotal
+    // Verify cart items are present
+    const cartItems = await page.locator('.cart_item').count();
+    expect(cartItems).toBe(3);
+
+    // Verify cart badge shows 3 items
+    const cartBadge = await page.locator('.shopping_cart_badge').textContent();
+    expect(cartBadge).toBe('3');
+
+    // Navigate to checkout to see totals
+    await page.waitForSelector(SELECTORS.cart.checkoutBtn, { timeout: 10000 });
+    const checkoutBtn = page.locator(SELECTORS.cart.checkoutBtn);
+    await checkoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await checkoutBtn.click();
+    await page.waitForURL('**/checkout-step-one.html');
+
+    // Fill in shipping info
+    await page.fill(SELECTORS.checkout.step1.firstName, 'Test');
+    await page.fill(SELECTORS.checkout.step1.lastName, 'User');
+    await page.fill(SELECTORS.checkout.step1.postalCode, '12345');
+
+    // Continue to checkout step 2 to verify totals
+    await page.click(SELECTORS.checkout.step1.continueBtn);
+    await page.waitForURL('**/checkout-step-two.html');
+
+    // Verify subtotal is calculated
     const subtotalText = await page.locator('.summary_subtotal_label').textContent();
     const subtotalMatch = subtotalText?.match(/[\d.]+/);
     const subtotal = parseFloat(subtotalMatch?.[0] || '0');
     expect(subtotal).toBeCloseTo(55.97, 1); // $29.99 + $9.99 + $15.99
 
-    // Verify total is calculated
+    // Verify total is calculated (includes tax)
     const totalText = await page.locator('.summary_total_label').textContent();
     expect(totalText).toBeTruthy();
   });
