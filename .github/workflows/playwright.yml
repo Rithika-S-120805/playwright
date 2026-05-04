@@ -65,22 +65,22 @@ jobs:
           for (const failure of failures) {
             const issueTitle = `❌ Test Failed: ${failure.fullTitle}`;
             const issueBody = `
-          ## Test Failure Details
-          
-          **File:** \`${failure.file}\`
-          **Line:** ${failure.line}
-          
-          ### Error Message
-          \`\`\`
-          ${failure.error}
-          \`\`\`
-          
-          **Triggered by:** ${context.ref}
-          **Run:** [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-          
-          ---
-          *This issue was automatically created by GitHub Actions*
-          `;
+## Test Failure Details
+
+**File:** \`${failure.file}\`
+**Line:** ${failure.line}
+
+### Error Message
+\`\`\`
+${failure.error}
+\`\`\`
+
+**Triggered by:** ${context.ref}
+**Run:** [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+---
+*This issue was automatically created by GitHub Actions*
+`;
             
             try {
               // Check if an issue already exists for this test
