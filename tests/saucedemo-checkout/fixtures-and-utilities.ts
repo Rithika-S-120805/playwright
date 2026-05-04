@@ -235,11 +235,11 @@ export async function getCartItemCount(page: Page): Promise<number> {
   return parseInt(count || '0', 10);
 }
 
-export async function calculateTotalPrice(items: number[]): number {
+export async function calculateTotalPrice(items: number[]): Promise<number> {
   return items.reduce((sum, price) => sum + price, 0);
 }
 
-export async function calculateTaxAmount(subtotal: number, taxRate: number = 0.07): number {
+export async function calculateTaxAmount(subtotal: number, taxRate: number = 0.07): Promise<number> {
   return parseFloat((subtotal * taxRate).toFixed(2));
 }
 
