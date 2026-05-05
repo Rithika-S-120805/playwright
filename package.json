@@ -1,15 +1,34 @@
 {
   "name": "playwrightagent",
   "version": "1.0.0",
-  "description": "",
+  "description": "Playwright testing with automatic GitHub issue creation on test failures",
   "main": "index.js",
-  "scripts": {},
-  "keywords": [],
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:with-issues": "playwright test && npm run process-failures",
+    "process-failures": "node scripts/process-test-failures.js",
+    "verify": "node scripts/verify-setup.js",
+    "examples": "node examples/github-issue-example.js"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "github-issues",
+    "automation"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "esbuild-register": "^3.5.0",
+    "typescript": "^5.2.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }

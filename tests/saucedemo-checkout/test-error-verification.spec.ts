@@ -1,22 +1,17 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Error Verification Tests', () => {
-  test('Intentional failure - verify GitHub issue creation', async ({ page }) => {
-    // This test deliberately fails to verify the GitHub Actions workflow
-    // creates issues for failing tests
-    
+  test('Page loads correctly - verify checkout test setup', async ({ page }) => {
     await page.goto('https://www.saucedemo.com');
-    
-    // This assertion will fail
-    expect(true).toBe(false);
+
+    await expect(page).toHaveTitle(/Swag Labs/i);
   });
-  
-  test('Another intentional failure - test error formatting', async ({ page }) => {
-    // Second test failure to show multiple issues
+
+  test('Login form renders required elements', async ({ page }) => {
     await page.goto('https://www.saucedemo.com');
-    
-    // This will fail with a clear error
-    const nonExistentElement = await page.locator('button.this-does-not-exist').count();
-    expect(nonExistentElement).toBe(5);
+
+    await expect(page.locator('[data-test="username"]')).toBeVisible();
+    await expect(page.locator('[data-test="password"]')).toBeVisible();
+    await expect(page.locator('[data-test="login-button"]')).toBeVisible();
   });
 });

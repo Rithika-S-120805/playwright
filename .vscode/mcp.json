@@ -7,6 +7,16 @@
         "playwright",
         "run-test-mcp-server"
       ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "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"
+      }
     }
   },
   "inputs": []

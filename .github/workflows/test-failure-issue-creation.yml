@@ -1,0 +1,117 @@
+name: Test Failure Issue Creation
+
+on:
+  workflow_run:
+    workflows: ['Playwright Tests']
+    types:
+      - completed
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: false
+
+jobs:
+  create-issues:
+    name: Create Issues for Test Failures
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure' || always()
+    permissions:
+      issues: write
+      repository-projects: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download test results
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: playwright-tests.yml
+          path: ./test-results
+        continue-on-error: true
+
+      - name: Parse test results and create issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          node -r esbuild-register scripts/process-test-failures.ts
+
+---
+
+# Alternative: Direct test run with embedded reporter
+
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Playwright Tests
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install
+
+      - name: Run Playwright tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: npm test -- --reporter=list,json,html
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 30
+
+      - name: Create GitHub issues for failures
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          if [ -f test-results/results.json ]; then
+            node -r esbuild-register scripts/process-test-failures.ts
+          fi
