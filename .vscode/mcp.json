@@ -15,9 +15,9 @@
         "@modelcontextprotocol/server-github"
       ],
       "env": {
-      "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
+      "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"  /* Ensure you have GITHUB_TOKEN set in your environment variables for authentication with GitHub API */
     }
-    }
+  }
   },
   "inputs": []
 }
